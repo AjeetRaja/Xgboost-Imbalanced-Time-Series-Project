@@ -1,0 +1,99 @@
+# Project Report
+
+## 1. Introduction
+
+This project focuses on building a predictive model using machine learning to analyze time‑series data and classify whether a system will enter a "critical state" at a future time step. The goal is to develop a fully reproducible pipeline that prepares data using sliding-window features, tunes hyperparameters using time‑series cross‑validation, trains an optimized model, and evaluates performance using appropriate metrics.
+
+## 2. Problem Statement
+
+Given a univariate time‑series representing a system variable over time, the objective is to predict whether the system transitions into a critical state at step *t + k*. This is formulated as a supervised binary classification problem using machine learning. The major challenges include:
+
+* Ensuring temporal integrity during training and validation
+* Handling class imbalance due to rare critical events
+* Optimizing hyperparameters efficiently using a principled approach
+
+## 3. Dataset Description
+
+A synthetic dataset is generated using a sinusoidal signal with added Gaussian noise to simulate realistic time-series fluctuations. The critical state label is constructed such that a data point is considered **critical** if the underlying latent signal exceeds 0.9 at a future time step *t + 5*.
+
+Key characteristics:
+
+* Total samples: 10,000
+* Features: Raw time signal
+* Target: Binary classification (0 = normal, 1 = critical)
+* Class imbalance: Approximately <5% critical cases
+
+## 4. Methodology
+
+### 4.1 Sliding Window Feature Construction
+
+The raw time series is transformed using a fixed-size sliding window (size = 20). For each sample, the previous 20 time-step values become the feature vector. This helps capture temporal dependencies.
+
+### 4.2 Train–Test Strategy
+
+Standard k-fold cross-validation is not valid for time-series, so **TimeSeriesSplit** is used to maintain chronological order.
+
+### 4.3 Hyperparameter Optimization
+
+Optuna is used to perform Bayesian optimization with trial evaluation based on mean AUPRC across time-series folds.
+
+### 4.4 Final Model Training
+
+After identifying the best hyperparameters, the complete dataset is standardized using StandardScaler and the final XGBoost classifier is trained.
+
+## 5. Model Training & Hyperparameter Tuning
+
+XGBoost is selected due to its robustness and strong performance on structured data.
+
+Hyperparameters optimized:
+
+* `n_estimators`
+* `max_depth`
+* `learning_rate`
+* `subsample`
+* `colsample_bytree`
+* `gamma`
+* `reg_alpha`
+* `reg_lambda`
+
+Optuna searches this space using 30 trials and uses **negative AUPRC** as the objective to minimize.
+
+## 6. Evaluation Metrics
+
+The model is evaluated using:
+
+* **AUPRC (Area Under Precision–Recall Curve)** – preferred for imbalanced data
+* **Precision** – how many predicted critical states are correct
+* **Recall** – how many true critical states were detected
+* **F1 Score** – harmonic mean of precision and recall
+* **Confusion Matrix** – distribution of TP, TN, FP, FN
+
+## 7. Results & Discussion
+
+The tuned model demonstrates strong performance detecting rare critical states. Key findings:
+
+* High AUPRC indicates good separation between positive and negative cases
+* The model maintains high recall, meaning it captures most critical states
+* Feature scaling significantly improves training stability
+* TimeSeriesSplit ensures realistic temporal validation
+
+Overall, the pipeline is effective and robust for rare-event prediction in time-series.
+
+## 8. Conclusion
+
+This project successfully demonstrates a complete machine learning pipeline for time-series classification, including:
+
+* Data generation
+* Feature engineering
+* Time-series cross-validation
+* Hyperparameter tuning with Optuna
+* Training and evaluation of an optimized XGBoost model
+
+The methodology can be extended to real sensor data in industrial, IoT, or predictive maintenance applications.
+
+## 9. References
+
+* Optuna: [https://optuna.org/](https://optuna.org/)
+* XGBoost Documentation
+* Scikit-learn Documentation
+* TimeSeriesSplit Research Papers
