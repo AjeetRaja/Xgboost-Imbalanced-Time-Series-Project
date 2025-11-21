@@ -18,6 +18,7 @@ This project demonstrates a complete **end-to-end anomaly detection pipeline** f
 ## 📌 Project Structure
 
 ```
+├──images                 # precision curve
 ├── report.md              # Full technical report
 ├── README.md              # Project overview & instructions
 ├── requirements.txt        # Dependencies
